@@ -19,7 +19,18 @@ public class LoginService {
     @Autowired
     private UsersRepository usersRepository;
 
-
+    /**
+     * Validate user as per email id and password
+     *
+     * @param req -> email
+     * @param req -> password
+     *            <p>
+     *  Error Code:
+     *            200 - success (Rend userId as response)
+     *            421 - Email not registered
+     *            422 - Password mismatch
+     *            423 - Account blocked
+     */
     public UniversalResponse login(UserPojo req) {
         UniversalResponse<Long> res = new UniversalResponse<>();
         String email = StrUtil.nonNull(req.getEmail());

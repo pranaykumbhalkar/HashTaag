@@ -37,6 +37,20 @@ public class TransactionService implements Constants {
     @Autowired
     private CreditRequestsRepository creditRequestsRepository;
 
+    /**
+     * User can credit it's wallet, we update current available credit and crete one transaction record.
+     * User can add max 10000 credit per month
+     *
+     * @implNote Here I considered some basic validations are already done by the frontend side. Ex: mandatory fields
+     *
+     * @param req -> userId (current login userId)
+     * @param req -> amount (amount to be credit)
+     * @param req -> comment (anything user want to add against transaction)
+     *
+     * Status Code:
+     *            200 - success (Response obfuscatedTransactionId for user reference)
+     *            421 - User reached monthly limit
+     */
 
     public UniversalResponse creditUserWallet(MakeTransactionJson req) {
         UniversalResponse<String> response = new UniversalResponse<>();
@@ -56,11 +70,29 @@ public class TransactionService implements Constants {
     }
 
 
+    /**
+     * Transfer credit to another wallet user.
+     * Here user select user from search result.
+     * We store selected userId and send to backend to make transaction
+     *
+     * @implNote Here I considered some basic validations are already done by the frontend side. Ex: mandatory fields
+     *
+     * @param req -> userId (current login user userId)
+     * @param req -> amount (amount to be credit)
+     * @param req -> transactionWith (selected userId to be transfer credit)
+     * @param req -> comment (anything user want to add against transaction)
+     *
+     * Status Code:
+     *            200 - success (Response obfuscatedTransactionId for user reference)
+     *            421 - Credit not available for transfer
+     *
+     */
+
     public UniversalResponse transferCreditToAnotherUser(MakeTransactionJson req) {
         UniversalResponse<String> response = new UniversalResponse<>();
         Users user = usersRepository.findByUserId(req.getUserId());
         if (user == null || user.getCreditAvailable() < req.getAmount()) {
-            response.setStatus(new ResponseCodeJson("Credit not available to transfer", 421));
+            response.setStatus(new ResponseCodeJson("Credit not available for transfer", 421));
             return response;
         }
         RandomString random = new RandomString(16);
@@ -75,6 +107,22 @@ public class TransactionService implements Constants {
         response.setStatus(new ResponseCodeJson("success", 200));
         return response;
     }
+
+    /**
+     * All transaction details for user
+     * Contains both (Credit and Debit) transaction
+     *
+     * @implNote Here I considered some basic validations are already done by the frontend side. Ex: mandatory fields
+     *
+     * @param userId login user userId
+     * @param pageNo for the pagination starting from 1
+     * @param limit no of transaction per page
+     *
+     * Status Code:
+     *            200 - success (Response all transaction details)
+     *            421 - Credit not available for transfer
+     *
+     */
 
     public UniversalResponse getAllTransactionByUserId(Long userId, Integer pageNo, Integer limit) {
         UniversalResponse response = new UniversalResponse();
@@ -98,9 +146,22 @@ public class TransactionService implements Constants {
 
 
     /**
-     * This method only use to save credit request
-     * We need to notify user after getting credit request
-     * Then user can accept or reject request
+     * Login user select user from search result.
+     * We store selected userId and send to backend with save request to make credit request
+     * Save credit request and notify to user 2 about credit request
+     * Only 1 active credit request per user
+     *
+     * @implNote Here I considered some basic validations are already done by the frontend side. Ex: mandatory fields
+     *
+     * @param req -> userId (current login user userId)
+     * @param req -> amount (credit to be requested)
+     * @param req -> transactionWith (selected userId to be request for credit)
+     * @param req -> comment (anything user want to add while request)
+     *
+     * Status Code:
+     *            200 - success (Response obfuscatedTransactionId for user reference)
+     *            421 - You already have active credit request
+     *
      */
 
     public UniversalResponse requestForCredit(MakeTransactionJson req) {
@@ -115,6 +176,20 @@ public class TransactionService implements Constants {
         response.setObject(requestId);
         return response;
     }
+
+
+    /**
+     * User 2 accept credit request.
+     * Transfer credit to request user (user 1) if available and deduct from user 2
+     *
+     * @implNote Here I considered some basic validations are already done by the frontend side. Ex: mandatory fields
+     *
+     * @param req -> creditRequestId (request id to identify request)
+     *
+     * Status Code:
+     *            200 - success (Response obfuscatedTransactionId for user reference)
+     *            421 - InActive credit request
+     */
 
     public UniversalResponse acceptCreditRequest(MakeTransactionJson req) {
         UniversalResponse response = new UniversalResponse();
@@ -133,6 +208,17 @@ public class TransactionService implements Constants {
         return response;
     }
 
+    /**
+     * User 2 reject credit request
+     *
+     * @implNote Here I considered some basic validations are already done by the frontend side. Ex: mandatory fields
+     *
+     * @param req -> creditRequestId (request id to identify request)
+     *
+     * Status Code:
+     *            200 - success
+     *            421 - InActive credit request
+     */
 
     public UniversalResponse rejectCreditRequest(MakeTransactionJson req) {
         UniversalResponse response = new UniversalResponse();

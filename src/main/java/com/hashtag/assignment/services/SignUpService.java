@@ -23,6 +23,20 @@ public class SignUpService {
     @Autowired
     private UsersRepository usersRepository;
 
+    /**
+     * Registration for new user, we are using email id as primary key for user identification
+     * For the while we skip email verification
+     *
+     * @param req -> email
+     * @param req -> password
+     * @param req -> firstName
+     * @param req -> lastName
+     * @param req -> phone
+     *            <p>
+     *  Error Code:
+     *            200 - success (Rend userId as response)
+     *            421 - Email already registered
+     */
     public UniversalResponse signUp(UserPojo req) {
         UniversalResponse response = new UniversalResponse();
         String email = StrUtil.nonNull(req.getEmail());
