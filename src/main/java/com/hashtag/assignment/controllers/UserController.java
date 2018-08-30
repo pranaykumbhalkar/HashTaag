@@ -2,7 +2,7 @@ package com.hashtag.assignment.controllers;
 
 
 import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
+import com.hashtag.assignment.pojo.SearchUserResponse;
 import com.hashtag.assignment.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +25,11 @@ public class UserController {
     private UserService userService;
 
     @RequestMapping(value = "/search/{userId}/{pageNo}/{searchString}", method = RequestMethod.GET)
-    public ResponseEntity<UniversalResponse> searchUser(@PathVariable("userId") Long userId,
-                                                        @PathVariable("pageNo") Integer pageNo,
-                                                        @PathVariable("searchString") String searchString) throws Exception {
+    public ResponseEntity<SearchUserResponse> searchUser(@PathVariable("userId") Long userId,
+                                                         @PathVariable("pageNo") Integer pageNo,
+                                                         @PathVariable("searchString") String searchString) throws Exception {
         logger.info("searchUser Request: " + pageNo + " " + searchString);
-        UniversalResponse response = userService.searchUser(userId, searchString, pageNo);
+        SearchUserResponse response = userService.searchUser(userId, searchString, pageNo);
         ResponseCodeJson rc = response.getStatus();
         return new ResponseEntity<>(response, HttpStatus.valueOf(rc.getErrorCode()));
     }

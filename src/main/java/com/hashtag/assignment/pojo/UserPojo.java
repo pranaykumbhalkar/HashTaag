@@ -8,11 +8,9 @@ import lombok.Data;
 
 @Data
 public class UserPojo {
-    private Long userId;
     private String email;
     private String password;
     private String firstName;
     private String phone;
     private String lastName;
-    private Integer reqId;
 }

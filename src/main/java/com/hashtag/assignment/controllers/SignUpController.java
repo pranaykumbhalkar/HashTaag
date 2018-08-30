@@ -1,7 +1,6 @@
 package com.hashtag.assignment.controllers;
 
 import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
 import com.hashtag.assignment.pojo.UserPojo;
 import com.hashtag.assignment.services.SignUpService;
 import org.slf4j.Logger;
@@ -29,11 +28,9 @@ public class SignUpController {
 
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public ResponseEntity<UniversalResponse> signUp(@RequestBody UserPojo req) throws Exception {
+    public ResponseEntity<ResponseCodeJson> signUp(@RequestBody UserPojo req) throws Exception {
         logger.info("Sign Up Request: " + req);
-        UniversalResponse response = signUpService.signUp(req);
-        ResponseCodeJson rc = response.getStatus();
-        response.setReqId(req.getReqId());
-        return new ResponseEntity<>(response, HttpStatus.valueOf(rc.getErrorCode()));
+        ResponseCodeJson rc = signUpService.signUp(req);
+        return new ResponseEntity<>(rc, HttpStatus.valueOf(rc.getErrorCode()));
     }
 }

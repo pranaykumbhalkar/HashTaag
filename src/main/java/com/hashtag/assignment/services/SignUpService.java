@@ -2,7 +2,6 @@ package com.hashtag.assignment.services;
 
 import com.hashtag.assignment.models.Users;
 import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
 import com.hashtag.assignment.pojo.UserPojo;
 import com.hashtag.assignment.repository.UsersRepository;
 import com.hashtag.assignment.utils.AtomicIdCounter;
@@ -37,17 +36,14 @@ public class SignUpService {
      *            200 - success (Rend userId as response)
      *            421 - Email already registered
      */
-    public UniversalResponse signUp(UserPojo req) {
-        UniversalResponse response = new UniversalResponse();
+    public ResponseCodeJson signUp(UserPojo req) {
         String email = StrUtil.nonNull(req.getEmail());
         Boolean isAlreadyExist = usersRepository.existsByEmail(email);
-        if (isAlreadyExist) {
-            response.setStatus(new ResponseCodeJson("Email already registered", 421));
-            return response;
-        }
+        if (isAlreadyExist)
+            return new ResponseCodeJson("Email already registered", 421);
+
         createNewUser(req);
-        response.setStatus(new ResponseCodeJson("success", 200));
-        return response;
+        return new ResponseCodeJson("success", 200);
     }
 
     private void createNewUser(UserPojo req) {

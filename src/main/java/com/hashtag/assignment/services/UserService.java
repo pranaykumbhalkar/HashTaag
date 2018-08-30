@@ -2,7 +2,7 @@ package com.hashtag.assignment.services;
 
 import com.hashtag.assignment.models.Users;
 import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
+import com.hashtag.assignment.pojo.SearchUserResponse;
 import com.hashtag.assignment.pojo.UserInformationJson;
 import com.hashtag.assignment.repository.UsersRepository;
 import org.springframework.beans.BeanUtils;
@@ -37,8 +37,8 @@ public class UserService {
      *            421 - No user found for specific search string
      */
 
-    public UniversalResponse searchUser(Long userId, String searchString, Integer pageNo) {
-        UniversalResponse response = new UniversalResponse();
+    public SearchUserResponse searchUser(Long userId, String searchString, Integer pageNo) {
+        SearchUserResponse response = new SearchUserResponse();
         List<Users> usersList = usersRepository.searchUser(userId, searchString, new PageRequest(pageNo - 1, 10));
         if (usersList.size() == 0) {
             response.setStatus(new ResponseCodeJson("User not found", 421));
@@ -52,7 +52,7 @@ public class UserService {
             userInfoList.add(userInfo);
         }
         response.setStatus(new ResponseCodeJson("success", 200));
-        response.setList(userInfoList);
+        response.setUserList(userInfoList);
         return response;
     }
 }

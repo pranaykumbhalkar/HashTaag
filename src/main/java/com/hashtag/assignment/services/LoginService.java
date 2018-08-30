@@ -1,9 +1,7 @@
 package com.hashtag.assignment.services;
 
 import com.hashtag.assignment.models.Users;
-import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
-import com.hashtag.assignment.pojo.UserPojo;
+import com.hashtag.assignment.pojo.*;
 import com.hashtag.assignment.repository.UsersRepository;
 import com.hashtag.assignment.utils.StrUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,9 @@ public class LoginService {
     private UsersRepository usersRepository;
 
     /**
-     * Validate user as per email id and password
+     * Validate user as per email id and password,
+     * If request user are not valid user, user will get specific error message
+     * If request user have valid credential, API return userId for further operation
      *
      * @param req -> email
      * @param req -> password
@@ -31,14 +31,15 @@ public class LoginService {
      *            422 - Password mismatch
      *            423 - Account blocked
      */
-    public UniversalResponse login(UserPojo req) {
-        UniversalResponse<Long> res = new UniversalResponse<>();
+
+    public LoginResponse login(LoginJson req) {
+        LoginResponse res = new LoginResponse();
         String email = StrUtil.nonNull(req.getEmail());
         String password = StrUtil.nonNull(req.getPassword());
         Users user = usersRepository.findByEmail(email);
         ResponseCodeJson rc = validateUser(user, password);
         if (rc.getErrorCode() == 200)
-            res.setObject(user.getUserId());
+            res.setUserId(user.getUserId());
         res.setStatus(rc);
         return res;
     }
@@ -46,7 +47,7 @@ public class LoginService {
     private ResponseCodeJson validateUser(Users user, String password) {
         if (user == null)
             return new ResponseCodeJson("Email not registered", 421);
-        if (!password.equalsIgnoreCase(user.getPassword()))
+        if (!password.equals(user.getPassword()))
             return new ResponseCodeJson("Password mismatch", 422);
         if (user.getActive().equals(0))
             return new ResponseCodeJson("Account blocked", 423);

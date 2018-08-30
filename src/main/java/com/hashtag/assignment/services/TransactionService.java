@@ -4,10 +4,7 @@ import com.hashtag.assignment.constants.Constants;
 import com.hashtag.assignment.models.CreditRequests;
 import com.hashtag.assignment.models.Transactions;
 import com.hashtag.assignment.models.Users;
-import com.hashtag.assignment.pojo.MakeTransactionJson;
-import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.TransactionJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
+import com.hashtag.assignment.pojo.*;
 import com.hashtag.assignment.repository.CreditRequestsRepository;
 import com.hashtag.assignment.repository.TransactionsRepository;
 import com.hashtag.assignment.repository.UsersRepository;
@@ -52,8 +49,8 @@ public class TransactionService implements Constants {
      *            421 - User reached monthly limit
      */
 
-    public UniversalResponse creditUserWallet(MakeTransactionJson req) {
-        UniversalResponse<String> response = new UniversalResponse<>();
+    public CreditWalletResponse creditUserWallet(CreditWalletJson req) {
+        CreditWalletResponse response = new CreditWalletResponse();
         Integer currentMonthCredited = transactionsRepository.getCurrentMonthTransactionAmountByUserIdAndTransactionType(req.getUserId(), CREDIT);
 
         currentMonthCredited = currentMonthCredited == null ? req.getAmount() : currentMonthCredited + req.getAmount();
@@ -65,7 +62,7 @@ public class TransactionService implements Constants {
         String transactionId = random.getRandomString();
         makeTransaction(req.getUserId(), 0L, transactionId, CREDIT, req.getAmount(), req.getComment());
         response.setStatus(new ResponseCodeJson("success", 200));
-        response.setObject(transactionId);
+        response.setObfuscatedTransactionId(transactionId);
         return response;
     }
 
@@ -88,8 +85,8 @@ public class TransactionService implements Constants {
      *
      */
 
-    public UniversalResponse transferCreditToAnotherUser(MakeTransactionJson req) {
-        UniversalResponse<String> response = new UniversalResponse<>();
+    public CreditWalletResponse transferCreditToAnotherUser(MakeTransactionJson req) {
+        CreditWalletResponse response = new CreditWalletResponse();
         Users user = usersRepository.findByUserId(req.getUserId());
         if (user == null || user.getCreditAvailable() < req.getAmount()) {
             response.setStatus(new ResponseCodeJson("Credit not available for transfer", 421));
@@ -103,7 +100,7 @@ public class TransactionService implements Constants {
         //Transaction record for credit transferred amount
         makeTransaction(req.getTransactionWith(), req.getUserId(), transactionId, CREDIT, req.getAmount(), req.getComment());
 
-        response.setObject(transactionId);
+        response.setObfuscatedTransactionId(transactionId);
         response.setStatus(new ResponseCodeJson("success", 200));
         return response;
     }
@@ -124,8 +121,8 @@ public class TransactionService implements Constants {
      *
      */
 
-    public UniversalResponse getAllTransactionByUserId(Long userId, Integer pageNo, Integer limit) {
-        UniversalResponse response = new UniversalResponse();
+    public TransactionResponse getAllTransactionByUserId(Long userId, Integer pageNo, Integer limit) {
+        TransactionResponse response = new TransactionResponse();
         List<Transactions> transactionsList = transactionsRepository.findByUserIdOrderByIdDesc(userId, new PageRequest(pageNo - 1, limit));
         if (transactionsList.size() == 0) {
             response.setStatus(new ResponseCodeJson("User not did any transaction yet", 421));
@@ -139,7 +136,7 @@ public class TransactionService implements Constants {
             transactionJson.setTransactionWith(getTransactionPartnerName(transactions.getTransactionWith()));
             transactionJsonList.add(transactionJson);
         }
-        response.setList(transactionJsonList);
+        response.setTransactionList(transactionJsonList);
         response.setStatus(new ResponseCodeJson("success", 200));
         return response;
     }
@@ -159,21 +156,22 @@ public class TransactionService implements Constants {
      * @param req -> comment (anything user want to add while request)
      *
      * Status Code:
-     *            200 - success (Response obfuscatedTransactionId for user reference)
+     *            200 - success
      *            421 - You already have active credit request
      *
      */
 
-    public UniversalResponse requestForCredit(MakeTransactionJson req) {
-        UniversalResponse<Long> response = new UniversalResponse<>();
+    public CreditRequestResponse requestForCredit(MakeTransactionJson req) {
+        CreditRequestResponse response = new CreditRequestResponse();
         Boolean isLiveRequest = creditRequestsRepository.existsByUserIdAndActive(req.getUserId(), 1);
         if (isLiveRequest) {
             response.setStatus(new ResponseCodeJson("You already have active credit request", 421));
             return response;
         }
-        Long requestId = saveCreditRequest(req);
+
+        Long creditRequestId = saveCreditRequest(req);
         response.setStatus(new ResponseCodeJson("success", 200));
-        response.setObject(requestId);
+        response.setCreditRequestId(creditRequestId);
         return response;
     }
 
@@ -191,15 +189,15 @@ public class TransactionService implements Constants {
      *            421 - InActive credit request
      */
 
-    public UniversalResponse acceptCreditRequest(MakeTransactionJson req) {
-        UniversalResponse response = new UniversalResponse();
+    public CreditWalletResponse acceptCreditRequest(ActionOnCreditRequestJson req) {
+        CreditWalletResponse response = new CreditWalletResponse();
         CreditRequests creditRequests = creditRequestsRepository.findByRequestId(req.getCreditRequestId());
         if (creditRequests.getActive().equals(0)) {
             response.setStatus(new ResponseCodeJson("InActive credit request", 421));
             return response;
         }
-        req = getCompatibleObj(creditRequests, req);
-        response = transferCreditToAnotherUser(req);
+        MakeTransactionJson makeTransaction = getCompatibleObj(creditRequests);
+        response = transferCreditToAnotherUser(makeTransaction);
         if (response.getStatus().getErrorCode() == 200) {
             creditRequests.setStatus(ACCEPTED);
             creditRequests.setActive(0);
@@ -220,18 +218,15 @@ public class TransactionService implements Constants {
      *            421 - InActive credit request
      */
 
-    public UniversalResponse rejectCreditRequest(MakeTransactionJson req) {
-        UniversalResponse response = new UniversalResponse();
+    public ResponseCodeJson rejectCreditRequest(ActionOnCreditRequestJson req) {
         CreditRequests creditRequests = creditRequestsRepository.findByRequestId(req.getCreditRequestId());
         if (creditRequests.getActive().equals(0)) {
-            response.setStatus(new ResponseCodeJson("InActive credit request", 421));
-            return response;
+            return new ResponseCodeJson("InActive credit request", 421);
         }
         creditRequests.setActive(0);
         creditRequests.setStatus(REJECTED);
         creditRequestsRepository.save(creditRequests);
-        response.setStatus(new ResponseCodeJson("success", 200));
-        return response;
+        return new ResponseCodeJson("success", 200);
     }
 
 
@@ -281,7 +276,8 @@ public class TransactionService implements Constants {
         }
     }
 
-    private MakeTransactionJson getCompatibleObj(CreditRequests creditRequests, MakeTransactionJson req) {
+    private MakeTransactionJson getCompatibleObj(CreditRequests creditRequests) {
+        MakeTransactionJson req = new MakeTransactionJson();
         req.setAmount(creditRequests.getRequestedAmount());
         req.setTransactionWith(creditRequests.getUserId());
         req.setComment(creditRequests.getComment());

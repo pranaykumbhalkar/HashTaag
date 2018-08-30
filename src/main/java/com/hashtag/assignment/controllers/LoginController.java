@@ -1,8 +1,6 @@
 package com.hashtag.assignment.controllers;
 
-import com.hashtag.assignment.pojo.ResponseCodeJson;
-import com.hashtag.assignment.pojo.UniversalResponse;
-import com.hashtag.assignment.pojo.UserPojo;
+import com.hashtag.assignment.pojo.*;
 import com.hashtag.assignment.services.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +25,10 @@ public class LoginController {
     private LoginService loginService;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public ResponseEntity<UniversalResponse> login(@RequestBody UserPojo req) throws Exception {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginJson req) throws Exception {
         logger.info("Login Request: " + req);
-        UniversalResponse response = loginService.login(req);
+        LoginResponse response = loginService.login(req);
         ResponseCodeJson rc = response.getStatus();
-        response.setReqId(req.getReqId());
         return new ResponseEntity<>(response, HttpStatus.valueOf(rc.getErrorCode()));
     }
 

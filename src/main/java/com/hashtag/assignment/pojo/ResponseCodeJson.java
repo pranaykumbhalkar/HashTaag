@@ -20,7 +20,6 @@ public class ResponseCodeJson {
      * errorCode : user for send custom http error code
      */
     private Integer errorCode;
-    private Integer reqId;
 
     public ResponseCodeJson() {
 

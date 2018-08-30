@@ -13,6 +13,4 @@ public class MakeTransactionJson {
     private Long transactionWith;
     private Integer amount;
     private String comment;
-    private Long creditRequestId;
-    private Integer reqId;
 }
