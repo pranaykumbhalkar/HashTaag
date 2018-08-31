@@ -25,9 +25,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
   public static final String SWAGGER = "/swagger**";
   public static final String SWAGGER2 = "/configuration/**";
   public static final String SWAGGER3 = "/error";
-  public static final String SWAGGER4 = "/v2/**";
+  public static final String SWAGGER4 = "/v2/api-docs";
   public static final String SWAGGER5 = "/webjars/**";
   public static final String SWAGGER6 = "/favicon.ico";
+  public static final String SWAGGER7 = "/swagger-ui.html#/";
+  public static final String SWAGGER8 = "/swagger-ui.html";
 
 
   @Autowired
@@ -46,6 +48,17 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         .antMatchers(SWAGGER4).permitAll()
         .antMatchers(SWAGGER5).permitAll()
         .antMatchers(SWAGGER6).permitAll()
+        .antMatchers(SWAGGER7).permitAll()
+        .antMatchers(SWAGGER8).permitAll()
+        .antMatchers(
+                HttpMethod.GET,
+                "/",
+                "/v2/api-docs",           // swagger
+                "/webjars/**",            // swagger-ui webjars
+                "/swagger-resources/**",  // swagger-ui resources
+                "/configuration/**",      // swagger configuration
+                "/*.html"
+        ).permitAll()
 
         .anyRequest().authenticated()
         .and()

@@ -8,10 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Created By Pranay on 8/27/2018
@@ -28,7 +25,7 @@ public class SignUpController {
 
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public ResponseEntity<ResponseCodeJson> signUp(@RequestBody UserPojo req) throws Exception {
+    public ResponseEntity<ResponseCodeJson> signUp(@RequestBody UserPojo req,@RequestHeader("Authorization") String key) throws Exception {
         logger.info("Sign Up Request: " + req);
         ResponseCodeJson rc = signUpService.signUp(req);
         return new ResponseEntity<>(rc, HttpStatus.valueOf(rc.getErrorCode()));

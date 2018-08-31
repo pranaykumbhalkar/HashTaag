@@ -27,7 +27,8 @@ public class UserController {
     @RequestMapping(value = "/search/{userId}/{pageNo}/{searchString}", method = RequestMethod.GET)
     public ResponseEntity<SearchUserResponse> searchUser(@PathVariable("userId") Long userId,
                                                          @PathVariable("pageNo") Integer pageNo,
-                                                         @PathVariable("searchString") String searchString) throws Exception {
+                                                         @PathVariable("searchString") String searchString,
+                                                         @RequestHeader("Authorization") String key) throws Exception {
         logger.info("searchUser Request: " + pageNo + " " + searchString);
         SearchUserResponse response = userService.searchUser(userId, searchString, pageNo);
         ResponseCodeJson rc = response.getStatus();
