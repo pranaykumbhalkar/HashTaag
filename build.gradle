@@ -20,6 +20,11 @@ group = 'com.hashtag'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
+jar {
+	baseName = 'hashtaag'
+	version = 'v1'
+}
+
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/snapshot" }
@@ -34,5 +39,11 @@ dependencies {
 	compileOnly('org.projectlombok:lombok')
 	compile("io.springfox:springfox-swagger2:2.6.1")
 	compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.6.1'
+
+	compile("org.springframework.boot:spring-boot-starter-security")
+	compile("io.jsonwebtoken:jjwt:0.7.0")
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	compile group: 'com.google.guava', name: 'guava', version: '23.0'
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
