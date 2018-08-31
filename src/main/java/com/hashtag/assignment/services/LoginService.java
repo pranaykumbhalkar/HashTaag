@@ -1,5 +1,6 @@
 package com.hashtag.assignment.services;
 
+import com.hashtag.assignment.jwt.JwtTokenGenerator;
 import com.hashtag.assignment.models.Users;
 import com.hashtag.assignment.pojo.*;
 import com.hashtag.assignment.repository.UsersRepository;
@@ -14,8 +15,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoginService {
 
+    //@Autowired
+    private final UsersRepository usersRepository;
+    //@Autowired
+    private final JwtTokenGenerator jwtTokenGenerator;
+
     @Autowired
-    private UsersRepository usersRepository;
+    public LoginService(
+            UsersRepository usersRepository,
+            JwtTokenGenerator jwtTokenGenerator) {
+        this.usersRepository = usersRepository;
+        this.jwtTokenGenerator = jwtTokenGenerator;
+    }
 
     /**
      * Validate user as per email id and password,
@@ -38,8 +49,10 @@ public class LoginService {
         String password = StrUtil.nonNull(req.getPassword());
         Users user = usersRepository.findByEmail(email);
         ResponseCodeJson rc = validateUser(user, password);
-        if (rc.getErrorCode() == 200)
+        if (rc.getErrorCode() == 200) {
             res.setUserId(user.getUserId());
+            res.setAuthToken("Bearer " + jwtTokenGenerator.generateToken(email));
+        }
         res.setStatus(rc);
         return res;
     }
@@ -53,4 +66,5 @@ public class LoginService {
             return new ResponseCodeJson("Account blocked", 423);
         return new ResponseCodeJson("success", 200);
     }
+
 }

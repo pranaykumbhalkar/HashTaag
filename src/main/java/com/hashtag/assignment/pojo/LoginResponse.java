@@ -9,4 +9,5 @@ import lombok.Data;
 public class LoginResponse {
     private ResponseCodeJson status;
     private Long userId;
+    private String authToken;
 }
