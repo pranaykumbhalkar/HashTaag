@@ -25,7 +25,7 @@ public class SignUpController {
 
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public ResponseEntity<ResponseCodeJson> signUp(@RequestBody UserPojo req,@RequestHeader("Authorization") String key) throws Exception {
+    public ResponseEntity<ResponseCodeJson> signUp(@RequestBody UserPojo req) throws Exception {
         logger.info("Sign Up Request: " + req);
         ResponseCodeJson rc = signUpService.signUp(req);
         return new ResponseEntity<>(rc, HttpStatus.valueOf(rc.getErrorCode()));
