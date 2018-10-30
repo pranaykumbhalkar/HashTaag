@@ -1,4 +1,4 @@
-# HashTaag
+# Simle-eVallet-with-JWT-token and Swagger enabled
 
 ### Setup to run the application
 
@@ -31,14 +31,6 @@ Prerequisites :
 
 *Step 5* : Upload jar file on cloud
 
-*Step 6* : Deploy using command **java -jar hashtaag-v1.jar** 
+*Step 6* : Deploy using command **java -jar eVallet-v1.jar** 
 
 
-## Deployed Application
-Java application deployed on AWS EC2 Instance
-
-URL : http://ec2-18-221-107-80.us-east-2.compute.amazonaws.com:8080
-
-Swagger API Documantation 
-
-URL : http://ec2-18-221-107-80.us-east-2.compute.amazonaws.com:8080/swagger-ui.html
